@@ -1,3 +1,4 @@
 .env
 .vscode
 images/*.png
+/venv

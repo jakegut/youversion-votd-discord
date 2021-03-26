@@ -40,7 +40,7 @@ async def get_version_id(version):
     j = r.json()
     versions_array = []
     for data in j['data']:
-        if(data['abbreviation'] == version):
+        if data['abbreviation'] == version:
             return data['id']
     return None   
 
@@ -50,9 +50,9 @@ async def get_verse(version='kjv'):
     """
     # Make a params dict to pass to API
     version_id = await get_version_id(version)
-    if version_id != None:
+    if version_id is not None:
         params = {
-            "version_id": await get_version_id(version),
+            "version_id": version_id,
         }
         day_of_year = int(datetime.datetime.now().strftime("%j"))
         r = requests.get("https://developers.youversionapi.com/1.0/verse_of_the_day/" + str(day_of_year), headers=headers, params=params)
@@ -85,11 +85,11 @@ async def on_ready():
 
 @bot.command(pass_context=True)
 async def votd(ctx, ver="KJV"):
-    '''
+    """
     Get a verse from YouVersion's VOTD API
-    '''
+    """
     verse = await get_verse(ver)
-    if verse != None:
+    if verse is not None:
         # Set the verse dict to variables to easily reference
         ref = verse['reference']
         text = verse['content']
@@ -103,13 +103,13 @@ async def votd(ctx, ver="KJV"):
         embed = discord.Embed(title="YouVersion's Verse of the Day")
         embed.add_field(name="Reference", value=ref, inline=False)
         embed.add_field(name="Verse", value=text, inline=False)
-        await bot.say(embed=embed)
-        await bot.say(image)
+        embed.set_image(url=image)
+        await ctx.send(embed=embed)
     else:
-        await bot.say("Version: '" + ver + "' not found. Say !versions to get a list of usable versions")
+        await ctx.send("Version: '" + ver + "' not found. Say !versions to get a list of usable versions")
 
 @bot.command(pass_context=True)
-async def versions():
+async def versions(ctx):
     """
     Get a list of versions you can use on the API
     """
@@ -119,6 +119,6 @@ async def versions():
     for version in versions_array:
         r_string += str(i) + ": " + version + "\n"
         i += 1
-    await bot.say(r_string)
+    await ctx.send(r_string)
 
 bot.run(d_token)
